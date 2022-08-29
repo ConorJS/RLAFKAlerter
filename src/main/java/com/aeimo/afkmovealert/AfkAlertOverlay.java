@@ -3,8 +3,10 @@ package com.aeimo.afkmovealert;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.Rectangle;
 import javax.inject.Inject;
+import net.runelite.api.Client;
 import net.runelite.client.ui.overlay.Overlay;
 
 public class AfkAlertOverlay extends Overlay {
@@ -13,32 +15,37 @@ public class AfkAlertOverlay extends Overlay {
     @Inject
     private AfkAlertPlugin plugin;
 
+    @Inject
+    private Client client;
+
     private boolean isRenderingAlertAnimation = false;
 
     @Override
     public Dimension render(Graphics2D graphics) {
         if (plugin.playerIsAfk()) {
             Color glowColor = plugin.getGlowColor();
-            Rectangle clientRectangle = plugin.getAppletClientRect();
-            Rectangle fullScreenOverlay = new Rectangle(
-                    // Weird offset (5, 20) for frame position reported by Applet
-                    // NOTE: Maybe just set these to -5 and -20 (rect x,y is always 0,0?)
-                    clientRectangle.x - 5,
-                    clientRectangle.y - 20,
-                    (int) clientRectangle.getWidth(), (int) clientRectangle.getHeight());
-
             graphics.setColor(new Color(
                     glowColor.getRed(),
                     glowColor.getGreen(),
                     glowColor.getBlue(),
                     getBreathingAlpha(plugin.getGlowBreathePeriod()))
             );
-            graphics.fillRect(fullScreenOverlay.x, fullScreenOverlay.y, fullScreenOverlay.width, fullScreenOverlay.height);
+
+            graphics.fill(getGameWindowRectangle());
         } else {
             isRenderingAlertAnimation = false;
         }
 
         return null;
+    }
+
+    private Rectangle getGameWindowRectangle() {
+        Dimension clientCanvasSize = client.getCanvas().getSize();
+        Point clientCanvasLocation = client.getCanvas().getLocation();
+        // Need to adjust rectangle position slightly to cover whole game window perfectly (x: -5, y: -20)
+        Point adjustedLocation = new Point(clientCanvasLocation.x - 5, clientCanvasLocation.y - 20);
+
+        return new Rectangle(adjustedLocation, clientCanvasSize);
     }
 
     private int getBreathingAlpha(int breathePeriodMillis) {

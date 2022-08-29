@@ -1,9 +1,7 @@
 package com.aeimo.afkmovealert;
 
 import com.google.inject.Provides;
-import java.applet.Applet;
 import java.awt.Color;
-import java.awt.Rectangle;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -34,9 +32,6 @@ public class AfkAlertPlugin extends Plugin {
 
     @Inject
     private Client client;
-
-    @Inject
-    private Applet appletClient;
 
     @Inject
     private OverlayManager overlayManager;
@@ -89,10 +84,6 @@ public class AfkAlertPlugin extends Plugin {
 
     public int afkDurationBankTicks() {
         return secondsToTicksRoundNearest(config.afkDurationThresholdBank());
-    }
-
-    public Rectangle getAppletClientRect() {
-        return appletClient.getBounds();
     }
 
     //== subscriptions ===============================================================================================================
